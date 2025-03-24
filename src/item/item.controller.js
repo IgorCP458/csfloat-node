@@ -4,7 +4,6 @@ const Item = require("./item.model"); // Modelo do banco de dados
 const updateDatabase = async (req, res) => {
   try {
     const { search_params } = req.body; // Captura os parâmetros do JSON enviado
-    console.log("Parâmetros recebidos:", search_params);
 
     if (!search_params || typeof search_params !== 'object') {
         return res.status(400).json({ erro: 'Parâmetros inválidos' });
@@ -31,31 +30,28 @@ const updateDatabase = async (req, res) => {
     });
 
     if (!resposta.ok) {
-        throw new Error(`Erro na requisição: ${resposta.status} ${resposta.statusText}`);
+      throw new Error(`Erro na requisição: ${resposta.status} ${resposta.statusText}`);
     }
 
     const dados = await resposta.json();
     
     dados.data.forEach(async listing => {
-       const listingOnDB = await Item.findOne({where: {itemID: listing.id}})
+       const listingOnDB = await Item.findOne({where: {listingId: listing.id}})
        if(listingOnDB === null) {
         const item = listing.item
         try {
           Item.create({
-            itemID: listing.id,
+            listingId: listing.id,
             price: listing.price, 
-            item: {
-              icon_url: item.icon_url,
-              market_hash_name: item.market_hash_name,
-              inspect_link: item.inspect_link,
-              type: item.type,
-              rarity_name: item.rarity_name,
-              wear_name: item.wear_name,
-              is_stattrak: item.is_stattrak,
-              is_souvenir: item.is_souvenir,
-            } 
+            icon_url: item.icon_url,
+            market_hash_name: item.market_hash_name,
+            inspect_link: item.inspect_link,
+            type: item.type,
+            rarity_name: item.rarity_name,
+            wear_name: item.wear_name,
+            is_stattrak: item.is_stattrak,
+            is_souvenir: item.is_souvenir, 
           })
-          count += 1
         } catch (error) {
         }
       }
@@ -71,8 +67,26 @@ const updateDatabase = async (req, res) => {
 // Buscar todos os itens do banco de dados
 const getItems = async (req, res) => {
   try {
-    const itens = await Item.findAll();
-    res.json({data: itens});
+    const items = await Item.findAll();
+    const formatedListing = items.map(listing => ({
+      
+      listingId: listing.listingId,
+      state: listing.state,
+      price: listing.price,
+      seller: listing.seller,
+      item: {
+        type: listing.type,
+        rarity_name: listing.rarity_name,
+        wear_name: listing.wear_name,
+        is_stattrak: listing.is_stattrak,
+        is_souvenir: listing.is_souvenir,
+        market_hash_name: listing.market_hash_name,
+        paint_seed: listing.paint_seed,
+        float: listing.float,
+        icon_url: listing.icon_url,
+      }
+    }))
+    res.json({data: formatedListing});
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar os itens" });
   }

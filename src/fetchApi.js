@@ -32,6 +32,7 @@ app.post('/csfloat', async (req, res) => {
 
         if (!resposta.ok) {
             throw new Error(`Erro na requisição: ${resposta.status} ${resposta.statusText}`);
+            console.log(search_params)
         }
 
         const dados = await resposta.json();
