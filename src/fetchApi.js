@@ -2,7 +2,6 @@
 app.post('/csfloat', async (req, res) => {
     try {
         const { search_params } = req.body; // Captura os parâmetros do JSON enviado
-        console.log("Parâmetros recebidos:", search_params);
 
         if (!search_params || typeof search_params !== 'object') {
             return res.status(400).json({ erro: 'Parâmetros inválidos' });
@@ -20,8 +19,6 @@ app.post('/csfloat', async (req, res) => {
             url.searchParams.append('max_price', search_params.max_price);
         }
 
-        console.log("URL gerada:", url.toString());
-
         const resposta = await fetch(url, {
             method: 'GET',
             headers: {
@@ -32,7 +29,6 @@ app.post('/csfloat', async (req, res) => {
 
         if (!resposta.ok) {
             throw new Error(`Erro na requisição: ${resposta.status} ${resposta.statusText}`);
-            console.log(search_params)
         }
 
         const dados = await resposta.json();
@@ -52,11 +48,5 @@ async function fetchData() {
       "limit": 100
     }
   }
-  
-  try {
-    console.log("sucesso")
-  } catch (erro) {
-    console.error("Erro ao buscar dados:", erro);
-    res.status(500).json({ erro: erro.message || 'Erro ao buscar dados' });
-  }
+
 }

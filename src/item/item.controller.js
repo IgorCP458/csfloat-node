@@ -51,6 +51,7 @@ const updateDatabase = async (req, res) => {
             wear_name: item.wear_name,
             is_stattrak: item.is_stattrak,
             is_souvenir: item.is_souvenir, 
+            float: item.float_value
           })
         } catch (error) {
         }

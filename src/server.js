@@ -19,7 +19,7 @@ connection.authenticate()
 const Item = require('./item/item.model')
 
 const itemRouter = require('./item/item.routes');
-const { fetchExternalData } = require('./item/item.controller');
+const { fetchExternalData, updateDatabase } = require('./item/item.controller');
 app.use('/', itemRouter)
 
 
@@ -44,7 +44,7 @@ app.post('/list-item', (req, res) => {
     listItems()
 })
 
-//setInterval(fetchExternalData, 50000);
+//setInterval(updateDatabase, 5000);
 
 // Middleware para capturar rotas não encontradas
 app.all('*', (req, res) => {
