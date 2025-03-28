@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize')
 
-const connection = new Sequelize(process.env.DATABASE, process.env.MYSQL_USER, process.env.MYSQL_PASS, {
+const connection = new Sequelize(process.env.FLOAT_DATABASE, process.env.FLOAT_USER, process.env.FLOAT_PASS, {
   host: 'localhost',
   dialect: 'mysql',
   dialectOptions: {

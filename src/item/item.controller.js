@@ -3,46 +3,51 @@ const Item = require("./item.model"); // Modelo do banco de dados
 // Função para buscar dados de uma API externa
 const updateDatabase = async (req, res) => {
   try {
-    const { search_params } = req.body; // Captura os parâmetros do JSON enviado
+    const search_params = {
+      sort_by: "most_recent",
+      min_price: 0,
+      limit: 50,
+    };
+    // Captura os parâmetros do JSON enviado
 
-    if (!search_params || typeof search_params !== 'object') {
-        return res.status(400).json({ erro: 'Parâmetros inválidos' });
-    }
+    const url = new URL("https://csfloat.com/api/v1/listings");
 
-    const url = new URL('https://csfloat.com/api/v1/listings');
-
-    if(search_params.sort_by) {
-        url.searchParams.append('sort_by', search_params.sort_by);
+    if (search_params.sort_by) {
+      url.searchParams.append("sort_by", search_params.sort_by);
     }
-    if(search_params.min_price) {
-        url.searchParams.append('min_price', search_params.min_price);
+    if (search_params.min_price) {
+      url.searchParams.append("min_price", search_params.min_price);
     }
-    if(search_params.max_price) {
-        url.searchParams.append('max_price', search_params.max_price);
+    if (search_params.max_price) {
+      url.searchParams.append("max_price", search_params.max_price);
     }
 
     const resposta = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Authorization': `${process.env.CSFLOAT_API_KEY}`,
-            'Content-Type': 'application/json'
-        }
+      method: "GET",
+      headers: {
+        Authorization: `${process.env.CSFLOAT_API_KEY}`,
+        "Content-Type": "application/json",
+      },
     });
 
     if (!resposta.ok) {
-      throw new Error(`Erro na requisição: ${resposta.status} ${resposta.statusText}`);
+      throw new Error(
+        `Erro na requisição: ${resposta.status} ${resposta.statusText}`
+      );
     }
 
     const dados = await resposta.json();
-    
-    dados.data.forEach(async listing => {
-       const listingOnDB = await Item.findOne({where: {listingId: listing.id}})
-       if(listingOnDB === null) {
-        const item = listing.item
+
+    dados.data.forEach(async (listing) => {
+      const listingOnDB = await Item.findOne({
+        where: { listingId: listing.id },
+      });
+      if (listingOnDB === null) {
+        const item = listing.item;
         try {
           Item.create({
             listingId: listing.id,
-            price: listing.price, 
+            price: listing.price,
             icon_url: item.icon_url,
             market_hash_name: item.market_hash_name,
             inspect_link: item.inspect_link,
@@ -50,27 +55,28 @@ const updateDatabase = async (req, res) => {
             rarity_name: item.rarity_name,
             wear_name: item.wear_name,
             is_stattrak: item.is_stattrak,
-            is_souvenir: item.is_souvenir, 
-            float: item.float_value
-          })
-        } catch (error) {
-        }
+            is_souvenir: item.is_souvenir,
+            float: item.float_value,
+          });
+        } catch (error) {}
       }
     });
-    res.json({msg: "Itens cadastrados!"})
-
-} catch (erro) {
+  } catch (erro) {
     console.error("Erro ao buscar dados:", erro);
-    res.status(500).json({ erro: erro.message || 'Erro ao buscar dados' });
-}
+  }
 };
 
 // Buscar todos os itens do banco de dados
 const getItems = async (req, res) => {
   try {
-    const items = await Item.findAll();
-    const formatedListing = items.map(listing => ({
-      
+    const { page } = req.body;
+    const pageSize = 40;
+    const offset = (page - 1) * pageSize;
+    const items = await Item.findAll({
+      limit: pageSize,
+      offset: offset,
+    });
+    const formatedListing = items.map((listing) => ({
       listingId: listing.listingId,
       state: listing.state,
       price: listing.price,
@@ -85,9 +91,9 @@ const getItems = async (req, res) => {
         paint_seed: listing.paint_seed,
         float: listing.float,
         icon_url: listing.icon_url,
-      }
-    }))
-    res.json({data: formatedListing});
+      },
+    }));
+    res.json({ data: formatedListing, page: page, offset: offset });
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar os itens" });
   }
