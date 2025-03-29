@@ -66,7 +66,6 @@ const updateDatabase = async (req, res) => {
   }
 };
 
-// Buscar todos os itens do banco de dados
 const getItems = async (req, res) => {
   try {
     const { page } = req.body;
