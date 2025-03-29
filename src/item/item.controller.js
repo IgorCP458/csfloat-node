@@ -90,12 +90,12 @@ const getItems = async (req, res) => {
         market_hash_name: listing.market_hash_name,
         paint_seed: listing.paint_seed,
         float: listing.float,
-        icon_url: listing.icon_url,
+        icon_url: listing.icon_url
       },
     }));
     res.json({ data: formatedListing, page: page, offset: offset });
   } catch (error) {
-    res.status(500).json({ error: "Erro ao buscar os itens" });
+    res.status(500).json({ error: "Erro ao buscar os itens!" });
   }
 };
 
